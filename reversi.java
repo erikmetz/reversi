@@ -8,6 +8,7 @@ public class reversi {
     state.print();
   }
 
+  /* Reads the input into an array and fills squares that are not part of the game with -1 */
   public static int[][] readBoard() {
     int[][] board = new int[8][14];
     for (int i = 0; i < board.length; i++) {
@@ -45,6 +46,10 @@ public class reversi {
   }
 }
 
+/*
+Stores the state of the game in an integer array
+Use -1 to represent cells of the array which are not actually part of the game
+*/
 class GameState {
   int[][] board;
 
