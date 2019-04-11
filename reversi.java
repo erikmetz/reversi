@@ -1,6 +1,7 @@
 
 import java.util.Scanner;
 import java.util.Arrays;
+import java.util.ArrayList;
 
 public class reversi {
   public static void main(String[] str) {
@@ -73,6 +74,66 @@ class GameState {
         }
       }
       System.out.println();
+    }
+  }
+
+  /* returns an array list of moves [row, column] */
+  public ArrayList<int[]> findMoves() {
+    ArrayList<int[]> moves = new ArrayList<int[]>();
+    for (int i = 0; i < board.length; i++) {
+      for (int j = 0; j < board[i].length; j++) {
+        if (isMove(i,j)) {
+          int[] move = new int[]{i,j};
+          moves.add(move);
+        }
+      }
+    }
+    return moves;
+  }
+
+  /* check if (rIn,cIn) is a legal move. incomplete, only checks horizontal and vertical directions */
+  public Boolean isMove(int rIn, int cIn) {
+    if (board[rIn][cIn] != 0) {
+      return false;
+    }
+    else {
+      int r = rIn - 1;
+      int c = cIn;
+      while ((r > 0) && (board[r][c]) == 2) {
+        r--;
+      }
+      if (board[r][c] == 1) {
+        return true;
+      }
+
+      r = rIn;
+      c = cIn - 1;
+      while ((c > 0) && (board[r][c]) == 2) {
+        c--;
+      }
+      if (board[r][c] == 1) {
+        return true;
+      }
+
+      r = rIn + 1;
+      c = cIn;
+      while ((r < board.length) && (board[r][c]) == 2) {
+        r++;
+      }
+      if (board[r][c] == 1) {
+        return true;
+      }
+
+      r = rIn;
+      c = cIn + 1;
+      while ((r < board[0].length) && (board[r][c]) == 2) {
+        c++;
+      }
+      if (board[r][c] == 1) {
+        return true;
+      }
+
+      return false;
     }
   }
 }
