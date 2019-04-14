@@ -14,8 +14,14 @@ public class reversi {
     //state.print();
 
     //System.out.println("\nMoves we can make:");
-    state.findAllMoves();
-  
+    //state.findAllMoves();
+    ArrayList<GameState> moves =  state.findMoves();
+    for (GameState g : moves) {
+      System.out.println("move:");
+      g.print();
+    }
+    //System.out.println("darn");
+
   }
 
   /* Reads the input into an array and fills squares that are not part of the game with -1 */
@@ -86,6 +92,10 @@ class GameState {
     }
   }
 
+  public void set(int i, int j, int val) {
+    board[i][j] = val;
+  }
+
   public void print() {
     for (int i = 0; i < board.length; i++) {
       for (int j = 0; j < board[i].length; j++) {
@@ -101,18 +111,89 @@ class GameState {
     }
   }
 
-  /* returns an array list of moves [row, column] */
-  public ArrayList<int[]> findMoves() {
-    ArrayList<int[]> moves = new ArrayList<int[]>();
+  /* returns an array list of moves in the form of gamestates from opponents perspective */
+  public ArrayList<GameState> findMoves() {
+    ArrayList<GameState> moves = new ArrayList<GameState>();
     for (int i = 0; i < board.length; i++) {
       for (int j = 0; j < board[i].length; j++) {
-        if (isMove(i,j)) {
-          int[] move = new int[]{i,j};
-          moves.add(move);
+        GameState result = computeMove(i,j);
+        if (result != null) {
+          System.out.println("hello");
+          moves.add(result);
         }
       }
     }
     return moves;
+  }
+
+
+  /* clones current gamestate */
+  public GameState clone() {
+    return new GameState(board);
+  }
+
+  /* switches current player */
+  public void swap() {
+    for (int i = 0; i < board.length; i++) {
+      for (int j = 0; j < board[i].length; j++) {
+        if (board[i][j] == 1) {
+          board[i][j] = 2;
+        }
+        else if (board[i][j] == 2) {
+          board[i][j] = 1;
+        }
+      }
+    }
+  }
+
+  /* computes the result of moving at (i,j) and return null if invalid move */
+  public GameState computeMove(int i, int j) {
+    if (i < 0 || j < 0 || i >= 8 || j >= 14 || board[i][j] != 0) {
+      return null;
+    }
+    int[][] dirs = {{0,1}, {1,1}, {1,0}, {1,-1}, {0,-1}, {-1,-1}, {-1,0}, {-1,1}};
+
+    GameState curr = clone();
+    Boolean valid = false;
+    for (int k = 0; k < dirs.length; k++) {
+      valid |= curr.searchMove(i + dirs[k][0], j + dirs[k][1], dirs[k][0], dirs[k][1], 0);
+    }
+    if (valid) {
+      curr.set(i, j, 1);
+      curr.swap();
+      return curr;
+    }
+    else {
+      return null;
+    }
+  }
+
+  // only use as part of computeMove
+  private Boolean searchMove(int i, int j, int di, int dj, int flips) {
+    // check in bounds
+    if (i < 0 || j < 0 || i >= 8 || j >= 14) {
+      return false;
+    }
+
+    // System.out.println("Checking: i = " + i + " j = " + j + " di = " + di + " dj = " + dj + " flips = " + flips);
+
+    // only progress if there is an opponent piece in this direction
+    // or the spot is ours and at least one piece is flipped
+    if (board[i][j] == -1 || board[i][j] == 0 || ((board[i][j] == 1) && (flips == 0))) {
+      //System.out.println(board[i][j]);
+      return false;
+    } else if (board[i][j] == 1) {
+      // end of chain of opponent pieces
+      for (int n = 1; n <= flips; n++) {
+        board[i - di*n][j - dj*n] = 1;
+      }
+      //System.out.println("sometimes I return true");
+      return true;
+    } else {
+      // opponent cell, try and flip
+      //System.out.println("sometimes I return here");
+      return searchMove(i + di, j + dj, di, dj, flips + 1);
+    }
   }
 
   /* check if (rIn,cIn) is a legal move. incomplete, only checks horizontal and vertical directions */
@@ -260,7 +341,7 @@ class GameState {
     Move bestMove = moves.peek();
     // need to normalize move to account for whitespace
     System.out.println(
-      Integer.toString(bestMove.getI() + 1) + " " + 
+      Integer.toString(bestMove.getI() + 1) + " " +
       Integer.toString(bestMove.getJ() - whitespaces[bestMove.getI()] + 1)
     );
 
@@ -270,7 +351,7 @@ class GameState {
 
     // for debugging: print moves
 
-    boolean debug = false;
+    boolean debug = true;
 
     if (debug) {
 
