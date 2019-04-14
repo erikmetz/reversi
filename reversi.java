@@ -196,6 +196,22 @@ class GameState {
     }
   }
 
+  /* most basic possible evaluation function */
+  public int greedyboy() {
+    int e = 0;
+    for (int i = 0; i < board.length; i++) {
+      for (int j = 0; j < board[i].length; j++) {
+        if (board[i][j] == 1) {
+          e++;
+        }
+        else if (board[i][j] == 2) {
+          e--;
+        }
+      }
+    }
+    return e;
+  }
+
   /* Find all possible moves and store them in priority queue in order of how many pieces they flip */
 
   // Move object
