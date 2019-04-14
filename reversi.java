@@ -16,6 +16,7 @@ public class reversi {
 
     //System.out.println("\nMoves we can make:");
     //state.findAllMoves();
+    int[] whitespace = { 3, 2, 1, 0, 0, 1, 2, 3 };
     ArrayList<MoveState> moves =  state.findMoves();
     int minVal = Integer.MAX_VALUE;
     MoveState best = null;
@@ -28,6 +29,35 @@ public class reversi {
     }
     if (best != null) {
       best.getState().print();
+    }
+
+    GameState curr = best.getState();
+    Scanner input = new Scanner(System.in);
+    while (true) {
+      int row = input.nextInt();
+      int column = input.nextInt();
+      curr = curr.computeMove(row, column + whitespace[row]);
+      System.out.println();
+      curr.print();
+      moves = curr.findMoves();
+      minVal = Integer.MAX_VALUE;
+      best = null;
+      for (MoveState m : moves) {
+        int val = m.getState().alphaBeta(4, Integer.MIN_VALUE, Integer.MAX_VALUE, false);
+        if (val < minVal) {
+          best = m;
+          minVal = val;
+        }
+      }
+      if (best != null) {
+        System.out.println();
+        best.getState().print();
+        curr = best.getState();
+      }
+      else {
+        System.out.println("error");
+        return;
+      }
     }
     //System.out.println("darn");
 
