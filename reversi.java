@@ -196,54 +196,6 @@ class GameState {
     }
   }
 
-  /* check if (rIn,cIn) is a legal move. incomplete, only checks horizontal and vertical directions */
-  public Boolean isMove(int rIn, int cIn) {
-    if (board[rIn][cIn] != 0) {
-      return false;
-    }
-    else {
-      int r = rIn - 1;
-      int c = cIn;
-      while ((r > 0) && (board[r][c]) == 2) {
-        r--;
-      }
-      if (board[r][c] == 1) {
-        return true;
-      }
-
-      r = rIn;
-      c = cIn - 1;
-      while ((c > 0) && (board[r][c]) == 2) {
-        c--;
-      }
-      if (board[r][c] == 1) {
-        return true;
-      }
-
-      r = rIn + 1;
-      c = cIn;
-      while ((r < board.length) && (board[r][c]) == 2) {
-        r++;
-      }
-      if (board[r][c] == 1) {
-        return true;
-      }
-
-      r = rIn;
-      c = cIn + 1;
-      while ((r < board[0].length) && (board[r][c]) == 2) {
-        c++;
-      }
-      if (board[r][c] == 1) {
-        return true;
-      }
-
-      return false;
-    }
-  }
-
-
-
   /* Find all possible moves and store them in priority queue in order of how many pieces they flip */
 
   // Move object
