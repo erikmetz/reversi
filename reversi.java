@@ -7,6 +7,7 @@ import java.util.Queue;
 import java.util.PriorityQueue;
 import java.util.Comparator;
 import java.util.Iterator;
+import java.lang.Math;
 
 public class reversi {
   public static void main(String[] str) {
@@ -15,10 +16,18 @@ public class reversi {
 
     //System.out.println("\nMoves we can make:");
     //state.findAllMoves();
-    ArrayList<GameState> moves =  state.findMoves();
-    for (GameState g : moves) {
-      System.out.println("move:");
-      g.print();
+    ArrayList<MoveState> moves =  state.findMoves();
+    int minVal = Integer.MAX_VALUE;
+    MoveState best = null;
+    for (MoveState m : moves) {
+      int val = m.getState().alphaBeta(4, Integer.MIN_VALUE, Integer.MAX_VALUE, false);
+      if (val < minVal) {
+        best = m;
+        minVal = val;
+      }
+    }
+    if (best != null) {
+      best.getState().print();
     }
     //System.out.println("darn");
 
@@ -112,14 +121,13 @@ class GameState {
   }
 
   /* returns an array list of moves in the form of gamestates from opponents perspective */
-  public ArrayList<GameState> findMoves() {
-    ArrayList<GameState> moves = new ArrayList<GameState>();
+  public ArrayList<MoveState> findMoves() {
+    ArrayList<MoveState> moves = new ArrayList<MoveState>();
     for (int i = 0; i < board.length; i++) {
       for (int j = 0; j < board[i].length; j++) {
         GameState result = computeMove(i,j);
         if (result != null) {
-          System.out.println("hello");
-          moves.add(result);
+          moves.add(new MoveState(i, j, result));
         }
       }
     }
@@ -210,6 +218,50 @@ class GameState {
       }
     }
     return e;
+  }
+
+  /* alpha beta */
+  public int alphaBeta(int depth, int alpha, int beta, Boolean isMax) {
+    int mult;
+    if (isMax) {
+      mult = 1;
+    }
+    else {
+      mult = -1;
+    }
+    ArrayList<MoveState> moves =  this.findMoves();
+    if (depth == 0) {
+      return this.greedyboy()*mult;
+    }
+    if (moves.size() == 0) {
+      GameState opp = this.clone();
+      opp.swap();
+      if (opp.findMoves().size() == 0) {
+        return this.greedyboy()*mult;
+      }
+    }
+    if (isMax) {
+      int value = Integer.MIN_VALUE;
+      for (MoveState m : moves) {
+        value = Math.max(value, m.getState().alphaBeta(depth - 1, alpha, beta, false));
+        alpha = Math.max(alpha, value);
+        if (alpha >= beta) {
+          break; /* beta cutoff */
+        }
+      }
+      return value*mult;
+    }
+    else {
+      int value = Integer.MAX_VALUE;
+      for (MoveState m : moves) {
+        value = Math.min(value, m.getState().alphaBeta(depth - 1, alpha, beta, true));
+        beta = Math.min(beta, value);
+        if (alpha >= beta) {
+          break; /* alpha cutoff */
+        }
+      }
+      return value*mult;
+    }
   }
 
   /* Find all possible moves and store them in priority queue in order of how many pieces they flip */
@@ -348,4 +400,28 @@ class GameState {
 
   }
 
+}
+
+/* contains a move (i,j) and the resulting state (from opponent perspective) */
+class MoveState {
+  private int row, column;
+  private GameState state;
+
+  public MoveState(int i, int j, GameState s) {
+    row = i;
+    column = j;
+    state = s;
+  }
+
+  public GameState getState() {
+    return state;
+  }
+
+  public int getRow() {
+    return row;
+  }
+
+  public int getColumn() {
+    return column;
+  }
 }
