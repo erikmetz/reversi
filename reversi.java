@@ -11,7 +11,7 @@ import java.lang.Math;
 
 public class reversi {
   public static void main(String[] str) {
-    playHuman();
+    playAIs(0, 2);
     //System.out.println("\nMoves we can make:");
     //state.findAllMoves();
   }
@@ -54,7 +54,8 @@ public class reversi {
     return board;
   }
 
-  public static void playHuman() {
+  public static void playHuman(int heuristic) {
+    Heuristics.h = heuristic;
     GameState curr = new GameState(readBoard());
     MoveState best;
     Scanner input = new Scanner(System.in);
@@ -88,6 +89,66 @@ public class reversi {
         curr.print();
         return;
       }
+    }
+  }
+
+  public static void playAIs(int h1, int h2) {
+    int[][] gameStart =
+    {
+      {-1, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0, -1, -1, -1},
+      {-1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, -1},
+      {-1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1},
+      {0, 0, 0, 0, 0, 0, 1, 2, 0, 0, 0, 0, 0, 0},
+      {0, 0, 0, 0, 0, 0, 2, 1, 0, 0, 0, 0, 0, 0},
+      {-1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1},
+      {-1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, -1},
+      {-1, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0, -1, -1, -1}
+    };
+    GameState curr = new GameState(gameStart);
+    MoveState best;
+    int maxVal;
+    ArrayList<MoveState> moves;
+    int passes = 0;
+    int player = 2;
+    while (passes < 2) {
+      player = 3 - player;
+      if (player == 1) {
+        curr.print();
+      } else {
+        curr.print2();
+      }
+      if (player == 1) {
+        Heuristics.h = h1;
+      } else {
+        Heuristics.h = h2;
+      }
+      moves = curr.findMoves();
+      maxVal = Integer.MIN_VALUE;
+      best = null;
+      for (MoveState m : moves) {
+        int val = m.getState().alphaBeta(4, Integer.MIN_VALUE, Integer.MAX_VALUE, false);
+        if (val >= maxVal) {
+          best = m;
+          maxVal = val;
+        }
+      }
+      if (best != null) {
+        System.out.println("MOVE " + player + "\n");
+        curr = best.getState();
+        passes = 0;
+      }
+      else {
+        System.out.println("PASS " + player + "\n");
+        curr.swap();
+        passes++;
+      }
+    }
+    player = 3 - player;
+    int winner = curr.winner();
+    if (winner > 0) {
+      System.out.println("Winner: " + player);
+    } else {
+      System.out.println("Winner: " + (3 - player));
     }
   }
 }
@@ -146,6 +207,24 @@ class GameState {
           System.out.print("* ");
         } else {
           System.out.print(board[i][j] + " ");
+        }
+      }
+      System.out.println();
+    }
+  }
+
+  //ok I know this isn't proper coding practices
+  public void print2() {
+    for (int i = 0; i < board.length; i++) {
+      for (int j = 0; j < board[i].length; j++) {
+        if (board[i][j] == -1) {
+          System.out.print("  ");
+        } else if (board[i][j] == 1) {
+          System.out.print("2 ");
+        } else if (board[i][j] == 2) {
+          System.out.print("1 ");
+        } else {
+          System.out.print("0 ");
         }
       }
       System.out.println();
@@ -279,6 +358,7 @@ class GameState {
   /*
     0: greedyboy
     1: weightedboy
+    2: weighted boy with mobility
   */
   public int evaluate() {
     switch(Heuristics.h) {
@@ -286,6 +366,10 @@ class GameState {
         return this.greedyboy();
       case 1:
         return this.weightedboy();
+      case 2:
+        return this.greedyboy() + (10*this.mobility());
+      case 3:
+      return this.zeroboy();
     }
     return 0;
   }
@@ -307,6 +391,10 @@ class GameState {
       }
     }
     return e;
+  }
+
+  public int zeroboy() {
+    return 0;
   }
 
   /* alpha beta */
