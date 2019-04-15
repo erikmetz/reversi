@@ -11,57 +11,11 @@ import java.lang.Math;
 
 public class reversi {
   public static void main(String[] str) {
-    GameState state = new GameState(readBoard());
-    //state.print();
-
+    playHuman();
     //System.out.println("\nMoves we can make:");
     //state.findAllMoves();
-    int[] whitespace = { 3, 2, 1, 0, 0, 1, 2, 3 };
-    ArrayList<MoveState> moves =  state.findMoves();
-    int minVal = Integer.MAX_VALUE;
-    MoveState best = null;
-    for (MoveState m : moves) {
-      int val = m.getState().alphaBeta(4, Integer.MIN_VALUE, Integer.MAX_VALUE, false);
-      if (val < minVal) {
-        best = m;
-        minVal = val;
-      }
-    }
-    if (best != null) {
-      best.getState().print();
-    }
-
-    GameState curr = best.getState();
-    Scanner input = new Scanner(System.in);
-    while (true) {
-      int row = input.nextInt();
-      int column = input.nextInt();
-      curr = curr.computeMove(row, column + whitespace[row]);
-      System.out.println();
-      curr.print();
-      moves = curr.findMoves();
-      minVal = Integer.MAX_VALUE;
-      best = null;
-      for (MoveState m : moves) {
-        int val = m.getState().alphaBeta(4, Integer.MIN_VALUE, Integer.MAX_VALUE, false);
-        if (val < minVal) {
-          best = m;
-          minVal = val;
-        }
-      }
-      if (best != null) {
-        System.out.println();
-        best.getState().print();
-        curr = best.getState();
-      }
-      else {
-        System.out.println("error");
-        return;
-      }
-    }
-    //System.out.println("darn");
-
   }
+
 
   /* Reads the input into an array and fills squares that are not part of the game with -1 */
   public static int[][] readBoard() {
@@ -99,6 +53,43 @@ public class reversi {
     }
     return board;
   }
+
+  public static void playHuman() {
+    GameState curr = new GameState(readBoard());
+    MoveState best;
+    Scanner input = new Scanner(System.in);
+    int minVal;
+    ArrayList<MoveState> moves;
+    int[] whitespace = { 3, 2, 1, 0, 0, 1, 2, 3 };
+    while (true) {
+      int row = input.nextInt();
+      int column = input.nextInt();
+      curr = curr.computeMove(row, column + whitespace[row]);
+      System.out.println();
+      curr.print();
+      moves = curr.findMoves();
+      minVal = Integer.MAX_VALUE;
+      best = null;
+      for (MoveState m : moves) {
+        int val = m.getState().alphaBeta(5, Integer.MIN_VALUE, Integer.MAX_VALUE, false);
+        if (val <= minVal) {
+          best = m;
+          minVal = val;
+        }
+      }
+      if (best != null) {
+        System.out.println();
+        best.getState().print();
+        curr = best.getState();
+      }
+      else {
+        System.out.println("PASS");
+        curr.swap();
+        curr.print();
+        return;
+      }
+    }
+  }
 }
 
 /*
@@ -121,6 +112,17 @@ class GameState {
 
   // necessary to convert our board coordinates to actual board coordinates
   static int[] whitespaces = { 3, 2, 1, 0, 0, 1, 2, 3 };
+  static int[][] weights =
+  {
+    {000, 000, 000, 100, -06, 007, 002, 002, 002, -06, 100, 000, 000, 000},
+    {000, 000, -04, -07, -07, -01, 001, 001, -01, -07, -07, -04, 000, 000},
+    {000, 010, 001, 007, 001, 007, 001, 001, 007, 001, 007, 001, 001, 000},
+    {015, -02, 004, 001, 001, 001, 001, 001, 001, 001, 001, 004, -02, 015},
+    {015, -02, 004, 001, 001, 001, 001, 001, 001, 001, 001, 004, -02, 015},
+    {000, 002, 001, 007, 001, 007, 001, 001, 007, 001, 007, 001, 002, 000},
+    {000, 000, -04, -07, -07, -01, 001, 001, -01, -07, -07, -04, 000, 000},
+    {000, 000, 000, 100, -06, 007, 002, 002, 007, -06, 100, 000, 000, 000},
+  };
 
   public GameState(int[][] boardIn) {
     board = new int[8][14];
@@ -250,6 +252,63 @@ class GameState {
     return e;
   }
 
+
+  public int winner() {
+    int e = 0;
+    for (int i = 0; i < board.length; i++) {
+      for (int j = 0; j < board[i].length; j++) {
+        if (board[i][j] == 1) {
+          e++;
+        }
+        else if (board[i][j] == 2) {
+          e--;
+        }
+      }
+    }
+    if (e > 0) {
+      return Integer.MAX_VALUE;
+    }
+    else if (e < 0) {
+      return Integer.MIN_VALUE;
+    }
+    else {
+      return 0;
+    }
+  }
+
+  /*
+    0: greedyboy
+    1: weightedboy
+  */
+  public int evaluate() {
+    switch(Heuristics.h) {
+      case 0:
+        return this.greedyboy();
+      case 1:
+        return this.weightedboy();
+    }
+    return 0;
+  }
+
+  public int mobility() {
+    return this.findMoves().size();
+  }
+
+  public int weightedboy() {
+    int e = 0;
+    for (int i = 0; i < board.length; i++) {
+      for (int j = 0; j < board[i].length; j++) {
+        if (board[i][j] == 1) {
+          e += weights[i][j];
+        }
+        else if (board[i][j] == 2) {
+          e -= weights[i][j];
+        }
+      }
+    }
+    return e;
+  }
+
   /* alpha beta */
   public int alphaBeta(int depth, int alpha, int beta, Boolean isMax) {
     int mult;
@@ -259,15 +318,15 @@ class GameState {
     else {
       mult = -1;
     }
-    ArrayList<MoveState> moves =  this.findMoves();
+    ArrayList<MoveState> moves = this.findMoves();
     if (depth == 0) {
-      return this.greedyboy()*mult;
+      return this.evaluate()*mult;
     }
     if (moves.size() == 0) {
       GameState opp = this.clone();
       opp.swap();
       if (opp.findMoves().size() == 0) {
-        return this.greedyboy()*mult;
+        return this.winner()*mult;
       }
     }
     if (isMax) {
@@ -276,6 +335,7 @@ class GameState {
         value = Math.max(value, m.getState().alphaBeta(depth - 1, alpha, beta, false));
         alpha = Math.max(alpha, value);
         if (alpha >= beta) {
+          //System.out.println("beta");
           break; /* beta cutoff */
         }
       }
@@ -287,6 +347,7 @@ class GameState {
         value = Math.min(value, m.getState().alphaBeta(depth - 1, alpha, beta, true));
         beta = Math.min(beta, value);
         if (alpha >= beta) {
+          //System.out.println("alpha");
           break; /* alpha cutoff */
         }
       }
@@ -454,4 +515,8 @@ class MoveState {
   public int getColumn() {
     return column;
   }
+}
+
+class Heuristics {
+  public static int h = 1;
 }
