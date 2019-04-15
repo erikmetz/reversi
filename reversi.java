@@ -59,7 +59,7 @@ public class reversi {
     GameState curr = new GameState(readBoard());
     MoveState best;
     Scanner input = new Scanner(System.in);
-    int minVal;
+    int maxVal;
     ArrayList<MoveState> moves;
     int[] whitespace = { 3, 2, 1, 0, 0, 1, 2, 3 };
     while (true) {
@@ -69,13 +69,13 @@ public class reversi {
       System.out.println();
       curr.print();
       moves = curr.findMoves();
-      minVal = Integer.MAX_VALUE;
+      maxVal = Integer.MIN_VALUE;
       best = null;
       for (MoveState m : moves) {
         int val = m.getState().alphaBeta(5, Integer.MIN_VALUE, Integer.MAX_VALUE, false);
-        if (val <= minVal) {
+        if (val >= maxVal) {
           best = m;
-          minVal = val;
+          maxVal = val;
         }
       }
       if (best != null) {
