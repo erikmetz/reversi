@@ -188,10 +188,7 @@ public class reversi {
   }
 }
 
-/*
-Stores the state of the game in an integer array
-Use -1 to represent cells of the array which are not actually part of the game
-*/
+/* 2d int array of game state, -1 is out of bounds */
 class GameState {
 
   /*
@@ -212,7 +209,7 @@ class GameState {
   {
     {000, 000, 000, 100, -06, 007, 002, 002, 002, -06, 100, 000, 000, 000},
     {000, 000, -04, -07, -07, -01, 001, 001, -01, -07, -07, -04, 000, 000},
-    {000, 010, 001, 007, 001, 007, 001, 001, 007, 001, 007, 001, 001, 000},
+    {000, 002, 001, 007, 001, 007, 001, 001, 007, 001, 007, 001, 002, 000},
     {015, -02, 004, 001, 001, 001, 001, 001, 001, 001, 001, 004, -02, 015},
     {015, -02, 004, 001, 001, 001, 001, 001, 001, 001, 001, 004, -02, 015},
     {000, 002, 001, 007, 001, 007, 001, 001, 007, 001, 007, 001, 002, 000},
@@ -233,6 +230,7 @@ class GameState {
     board[i][j] = val;
   }
 
+  /* debug print */
   public void print() {
     for (int i = 0; i < board.length; i++) {
       for (int j = 0; j < board[i].length; j++) {
@@ -248,7 +246,7 @@ class GameState {
     }
   }
 
-  //ok I know this isn't proper coding practices
+  /* standard game print */
   public void print2() {
     for (int i = 0; i < board.length; i++) {
       for (int j = 0; j < board[i].length; j++) {
@@ -464,6 +462,7 @@ class GameState {
     return emob + eweight + egreed*gweight;
   }
 
+  /* eval function 3: similar to 2, different weight based on total moves taken */
   public int cleverboy2() {
     int egreed = 0;
     int eweight = 0;
@@ -540,8 +539,6 @@ class GameState {
     }
   }
 
-  /* Find all possible moves and store them in priority queue in order of how many pieces they flip */
-
   // Move object
   class Move {
 
@@ -593,6 +590,7 @@ class GameState {
 
   }
 
+  /* Find all possible moves and store them in priority queue in order of how many pieces they flip */
   public void findAllMoves() {
 
     // find all of our pieces
@@ -641,13 +639,8 @@ class GameState {
       Integer.toString(bestMove.getJ() - whitespaces[bestMove.getI()] + 1)
     );
 
-
-
-
-
     // for debugging: print moves
-
-    boolean debug = true;
+    boolean debug = false;
 
     if (debug) {
 
@@ -703,6 +696,7 @@ class MoveState {
   }
 }
 
+/* eval function choice */
 class Heuristics {
   public static int h = 1;
 }
