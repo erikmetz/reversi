@@ -1,4 +1,4 @@
-//MAP: Erik Metz (114752550), Shivam Agrawal (uid#), Matt Pasquino (uid#)
+//MAP: Erik Metz (114752550), Shivam Agrawal (uid#), Matt Pasquino (115336858)
 
 import java.util.Scanner;
 import java.util.Arrays;
@@ -350,23 +350,6 @@ class GameState {
     }
   }
 
-  /* most basic possible evaluation function */
-  public int greedyboy() {
-    int e = 0;
-    for (int i = 0; i < board.length; i++) {
-      for (int j = 0; j < board[i].length; j++) {
-        if (board[i][j] == 1) {
-          e++;
-        }
-        else if (board[i][j] == 2) {
-          e--;
-        }
-      }
-    }
-    return e;
-  }
-
-
   public int winner() {
     int e = 0;
     for (int i = 0; i < board.length; i++) {
@@ -413,10 +396,28 @@ class GameState {
     return 0;
   }
 
+  /* evaluates moves available */
   public int mobility() {
     return this.findMoves().size();
   }
 
+  /* eval function 0: pure tile difference */
+  public int greedyboy() {
+    int e = 0;
+    for (int i = 0; i < board.length; i++) {
+      for (int j = 0; j < board[i].length; j++) {
+        if (board[i][j] == 1) {
+          e++;
+        }
+        else if (board[i][j] == 2) {
+          e--;
+        }
+      }
+    }
+    return e;
+  }
+
+  /* eval function 1: weighted tiles */
   public int weightedboy() {
     int e = 0;
     for (int i = 0; i < board.length; i++) {
@@ -436,6 +437,7 @@ class GameState {
     return 0;
   }
 
+  /* eval function 2: weighted + includes eval fn 0 */
   public int cleverboy() {
     int egreed = 0;
     int eweight = 0;
