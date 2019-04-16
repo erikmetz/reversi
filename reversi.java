@@ -11,7 +11,9 @@ import java.lang.Math;
 
 public class reversi {
   public static void main(String[] str) {
-    playAIs(0, 2);
+    playMove(4);
+    //playHuman(2);
+    //playAIs(4, 5);
     //System.out.println("\nMoves we can make:");
     //state.findAllMoves();
   }
@@ -52,6 +54,39 @@ public class reversi {
       board[7][j] = input.nextInt();
     }
     return board;
+  }
+
+  public static void playMove(int heuristic) {
+    Heuristics.h = heuristic;
+    GameState curr = new GameState(readBoard());
+    MoveState best;
+    int maxVal;
+    int numMoves;
+    ArrayList<MoveState> moves;
+    int d;
+    moves = curr.findMoves();
+    numMoves = moves.size();
+    if (numMoves > 15) {
+      d = 3;
+    } else if (numMoves > 9) {
+      d = 4;
+    } else if (numMoves > 5) {
+      d = 5;
+    } else {
+      d = 6;
+    }
+    maxVal = Integer.MIN_VALUE;
+    best = null;
+    for (MoveState m : moves) {
+      int val = m.getState().alphaBeta(d, Integer.MIN_VALUE, Integer.MAX_VALUE, false);
+      if (val >= maxVal) {
+        best = m;
+        maxVal = val;
+      }
+    }
+    if (best != null) {
+      System.out.println(best.getRow() + " " + best.getColumn());
+    }
   }
 
   public static void playHuman(int heuristic) {
@@ -123,6 +158,7 @@ public class reversi {
         Heuristics.h = h2;
       }
       moves = curr.findMoves();
+      System.out.println("Number of moves: " + moves.size());
       maxVal = Integer.MIN_VALUE;
       best = null;
       for (MoveState m : moves) {
@@ -369,7 +405,11 @@ class GameState {
       case 2:
         return this.greedyboy() + (10*this.mobility());
       case 3:
-      return this.zeroboy();
+        return this.zeroboy();
+      case 4:
+        return this.cleverboy();
+      case 5:
+        return this.cleverboy2();
     }
     return 0;
   }
@@ -395,6 +435,62 @@ class GameState {
 
   public int zeroboy() {
     return 0;
+  }
+
+  public int cleverboy() {
+    int egreed = 0;
+    int eweight = 0;
+    int tnum = 0;
+    int emob = this.findMoves().size();
+    int gweight = 0;
+    for (int i = 0; i < board.length; i++) {
+      for (int j = 0; j < board[i].length; j++) {
+        if (board[i][j] == 1) {
+          egreed += 1;
+          eweight += weights[i][j];
+          tnum += 1;
+        }
+        else if (board[i][j] == 2) {
+          egreed -= 1;
+          eweight -= weights[i][j];
+          tnum += 1;
+        }
+      }
+    }
+    if (tnum > 50) {
+      gweight = (tnum-50)*(tnum-50) / 30;
+    }
+    return emob + eweight + egreed*gweight;
+  }
+
+  public int cleverboy2() {
+    int egreed = 0;
+    int eweight = 0;
+    int tnum = 0;
+    int emob = this.findMoves().size();
+    int gweight = 0;
+    int wweight = 0;
+    for (int i = 0; i < board.length; i++) {
+      for (int j = 0; j < board[i].length; j++) {
+        if (board[i][j] == 1) {
+          egreed += 1;
+          eweight += weights[i][j];
+          tnum += 1;
+        }
+        else if (board[i][j] == 2) {
+          egreed -= 1;
+          eweight -= weights[i][j];
+          tnum += 1;
+        }
+      }
+    }
+    if (tnum > 50) {
+      gweight = (tnum - 50)*(tnum - 50) / 2;
+    }
+    if (tnum < 50) {
+      wweight = (50 - tnum) / 2;
+    }
+    return emob + eweight + egreed*gweight;
   }
 
   /* alpha beta */
@@ -601,7 +697,8 @@ class MoveState {
   }
 
   public int getColumn() {
-    return column;
+    int[] whitespace = { 3, 2, 1, 0, 0, 1, 2, 3 };
+    return column - whitespace[row];
   }
 }
 
