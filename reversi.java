@@ -67,14 +67,12 @@ public class reversi {
     int d;
     moves = curr.findMoves();
     numMoves = moves.size();
-    if (numMoves > 15) {
+    if (numMoves > 12) {
       d = 3;
-    } else if (numMoves > 9) {
-      d = 4;
     } else if (numMoves > 5) {
-      d = 5;
+      d = 4;
     } else {
-      d = 6;
+      d = 5;
     }
     maxVal = Integer.MIN_VALUE;
     best = null;
@@ -694,12 +692,12 @@ class MoveState {
   }
 
   public int getRow() {
-    return row;
+    return row + 1;
   }
 
   public int getColumn() {
     int[] whitespace = { 3, 2, 1, 0, 0, 1, 2, 3 };
-    return column - whitespace[row];
+    return column - whitespace[row] + 1;
   }
 }
 
