@@ -11,7 +11,7 @@ import java.lang.Math;
 
 public class reversi {
   public static void main(String[] str) {
-    playMove(4);
+    playMove(0);
     //playHuman(2);
     //playAIs(4, 5);
     //System.out.println("\nMoves we can make:");
@@ -399,7 +399,7 @@ class GameState {
   public int evaluate() {
     switch(Heuristics.h) {
       case 0:
-        return this.greedyboy();
+        return this.cleverboy();
       case 1:
         return this.weightedboy();
       case 2:
